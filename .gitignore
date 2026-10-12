@@ -1,0 +1,30 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+.venv/
+.pip-cache/
+.uv-cache/
+.tmp/
+models/
+logs/
+docs/
+transcripts/
+user_settings.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Distribution
+dist/
+build/
+release/
+*.egg-info/

@@ -1,0 +1,165 @@
+# LiveTrans Configuration
+
+audio:
+  # WASAPI loopback device name (null = default output device)
+  device: null
+  # Sample rate for capture
+  sample_rate: 16000
+  # Audio chunk duration in seconds for VAD processing (32ms = Silero VAD native window)
+  chunk_duration: 0.032
+
+asr:
+  # ASR engine: cloud-asr, whisper, funasr, anime-whisper, remote-whisper
+  # Default: Alibaba Cloud Model Studio (DashScope) Qwen3-ASR-Flash.
+  asr_engine: "cloud-asr"
+  # Model size: tiny, base, small, medium, large-v3
+  model_size: "medium"
+  # FunASR model: sensevoice-small, funasr-nano-2512, funasr-mlt-nano-2512
+  funasr_model: "sensevoice-small"
+  # Device: cuda or cpu
+  device: "cuda"
+  # Compute type: float16, int8_float16, int8
+  compute_type: "float16"
+  # Language: auto, en, ja, zh, ko, etc.
+  language: "auto"
+  # Minimum speech duration (seconds) before sending to ASR
+  min_speech_duration: 1.0
+  # Maximum speech duration (seconds) before forced segmentation
+  max_speech_duration: 8.0
+  # VAD threshold (0.0 - 1.0)
+  vad_threshold: 0.5
+  # SenseVoice input padding bucket in seconds (0 = disabled)
+  sensevoice_pad_seconds: 0.5
+  # faster-whisper input padding bucket in seconds (0 = disabled)
+  whisper_pad_seconds: 0.5
+  # Cloud ASR (used when asr_engine == "cloud-asr"). The api_key uses the
+  # "env:NAME" form so the secret stays in the environment variable and is
+  # never written into this git-tracked file.
+  cloud:
+    api_base: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key: "env:DASHSCOPE_API_KEY"
+    model: "qwen3-asr-flash"
+    proxy: "system"
+    timeout: 30
+
+translation:
+  # OpenAI-compatible API settings
+  # Default: Alibaba Cloud Model Studio (DashScope) qwen-plus for real-time subtitles.
+  # The api_key uses the "env:NAME" form so the secret stays in the environment
+  # variable and is never written into this git-tracked file.
+  api_base: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  api_key: "env:DASHSCOPE_API_KEY"
+  model: "qwen-plus"
+  proxy: "system"
+  # Target language for translation
+  target_language: "zh"
+  # Source language hint (auto = detect from ASR)
+  source_language: "auto"
+  # Context window size (number of recent translations to include)
+  context_window: 10
+  # Max tokens for translation response
+  max_tokens: 256
+  # Temperature
+  temperature: 0.3
+  # Enable streaming output
+  streaming: true
+  # System prompt template ({source_lang}, {target_lang}, {context} will be replaced)
+  system_prompt: |
+    你是一个专业的影视字幕翻译专家。请将以下{source_lang}对话翻译为{target_lang}。
+    要求：
+    1. 保持口语化，符合目标语言观众的表达习惯
+    2. 简洁明了，每句翻译不超过原文两行
+    3. 如果语句不完整，结合上下文补全含义
+    4. 不要添加解释或注释，只输出翻译结果
+
+    近期对话上下文：
+    {context}
+
+# Archive recap: the once-a-minute full-passage retranslation shown at the bottom
+# of the overlay. This runs in the cloud so it never competes with the local GPU
+# serving real-time subtitles. Uses Alibaba Cloud Model Studio (DashScope) and the
+# Qwen-MT family, which takes its settings via translation_options instead of a
+# system prompt.
+recap:
+  enabled: true
+  # DashScope OpenAI-compatible endpoint. Use dashscope-intl.aliyuncs.com for the
+  # international region.
+  api_base: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  # Set DASHSCOPE_API_KEY in the environment, or paste the key here.
+  api_key: ""
+  model: "qwen-mt-flash"
+  timeout: 60
+  proxy: "system"
+  # Terms are locked verbatim in the target language, mirroring the IT glossary
+  # used for real-time subtitles.
+  terms:
+    - source: "Databricks"
+      target: "Databricks"
+    - source: "Azure Key Vault"
+      target: "Azure Key Vault"
+    - source: "Key Vault"
+      target: "Key Vault"
+    - source: "secret scope"
+      target: "secret scope"
+    - source: "secret"
+      target: "secret"
+    - source: "Unity Catalog"
+      target: "Unity Catalog"
+    - source: "schema"
+      target: "schema"
+    - source: "Delta Lake"
+      target: "Delta Lake"
+    - source: "Delta table"
+      target: "Delta 表"
+    - source: "DataFrame"
+      target: "DataFrame"
+    - source: "notebook"
+      target: "notebook"
+    - source: "pipeline"
+      target: "pipeline"
+    - source: "cluster"
+      target: "cluster"
+    - source: "warehouse"
+      target: "warehouse"
+    - source: "service principal"
+      target: "service principal"
+    - source: "dbutils"
+      target: "dbutils"
+    - source: "warehouse_id"
+      target: "warehouse_id"
+    - source: "null"
+      target: "null"
+    - source: "rotate"
+      target: "轮换"
+    - source: "backfill"
+      target: "回填"
+  # Domain hints must be written in English.
+  domains: >-
+    The text is a transcript of an IT software engineering meeting. It covers
+    Databricks, Azure Key Vault, Unity Catalog, Spark, Delta Lake, Python and
+    Java development. Keep product names, APIs, config keys and code identifiers
+    in English, and use the terminology common among Chinese developers.
+
+subtitle:
+  # Font family
+  font_family: "Microsoft YaHei"
+  # Font size
+  font_size: 28
+  # Font color (hex)
+  font_color: "#FFFFFF"
+  # Outline color
+  outline_color: "#000000"
+  # Outline width
+  outline_width: 2
+  # Subtitle position from bottom (pixels)
+  bottom_margin: 80
+  # Show original text above translation
+  show_original: true
+  # Original text font size
+  original_font_size: 20
+  # Original text color
+  original_color: "#CCCCCC"
+  # Subtitle display duration (seconds)
+  display_duration: 5.0
+  # Window opacity (0.0 - 1.0)
+  opacity: 0.95
